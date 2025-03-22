@@ -1,9 +1,10 @@
+import argparse
 import hashlib
 import json
-from textwrap import dedent  # dedent removes leading zeros from multiline string
 from time import time
 from urllib.parse import urlparse
 from uuid import uuid4
+import requests
 
 from flask import Flask, jsonify, request
 
@@ -48,7 +49,7 @@ class Blockchain:
         new_chain = None
         max_length = len(self.chain)
         for node in neighbours:
-            response = request.get(f"http://{node}/chain")
+            response = requests.get(f"http://{node}/chain")
             if response.status_code == 200:
                 length = response.json()["length"]
                 chain = response.json()["chain"]
@@ -200,4 +201,10 @@ def consensus():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    #To specify a specific port to start the node on
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--port", type=int, default=5000, help="Port to run flask app on"
+    )
+    args = parser.parse_args()
+    app.run(debug=True, port=args.port)
